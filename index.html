@@ -3,156 +3,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⛏️ SURANDA NETWORK- $CBS </title>
+<title>SURANDA NETWORK</title>
 
 <style>
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial, sans-serif;
+font-family: 'Segoe UI', sans-serif;
 }
 
 body{
-background:#000;
-color:#FFD700;
+background: linear-gradient(135deg,#cfd9ff,#e2ebf0);
+min-height:100vh;
+padding:20px;
+}
+
+.header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:20px;
+}
+
+.profile{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.profile img{
+width:50px;
+height:50px;
+border-radius:15px;
+}
+
+.balance-section{
 text-align:center;
+margin-top:30px;
 }
 
-header{
-padding:20px;
-font-size:22px;
-font-weight:bold;
-background:linear-gradient(90deg,#000,#111,#000);
-box-shadow:0 0 20px #FFD70055;
-}
-
-.container{
-padding:20px;
-}
-
-.card{
-background:#111;
-margin:15px 0;
-padding:20px;
-border-radius:20px;
-box-shadow:0 0 25px #FFD70033;
+.balance-section h2{
+color:#555;
+font-weight:500;
 }
 
 .balance{
-font-size:32px;
-margin-top:10px;
+font-size:42px;
 font-weight:bold;
+margin:10px 0;
+color:#222;
 }
 
-button{
-margin-top:15px;
-padding:12px 25px;
-border:none;
-border-radius:15px;
-font-weight:bold;
-background:#FFD700;
-color:#000;
+.mining-bubble{
+width:180px;
+height:180px;
+margin:20px auto;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
 cursor:pointer;
+background: radial-gradient(circle at 30% 30%, #ffffffcc, #a1c4fd);
+box-shadow:0 15px 40px rgba(0,0,0,0.2);
 transition:0.3s;
+font-weight:bold;
 }
 
-button:hover{
-box-shadow:0 0 20px #FFD700;
+.mining-bubble:hover{
+transform:scale(1.05);
 }
 
-.timer{
-margin-top:10px;
-font-size:14px;
-color:#ccc;
+.card{
+background: rgba(255,255,255,0.6);
+backdrop-filter: blur(15px);
+padding:20px;
+border-radius:25px;
+margin-top:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+.button{
+background: linear-gradient(90deg,#667eea,#764ba2);
+color:white;
+padding:12px 20px;
+border:none;
+border-radius:30px;
+margin-top:15px;
+cursor:pointer;
+font-weight:bold;
 }
 
 .footer{
+text-align:center;
 margin-top:30px;
-padding:15px;
+color:#777;
 font-size:12px;
-color:#555;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-⛏️ SURANDA NETWORK  
-<br> $CBS
-</header>
-
-<div class="container">
-
-<div class="card">
-<h2>Saldo CBS</h2>
-<div class="balance" id="balance">0 $CBS</div>
+<div class="header">
+<div class="profile">
+<img src="https://i.imgur.com/4Z7b1.jpg">
+<div>
+<b>SURANDA NETWORK</b><br>
+<small>AI Mining System</small>
+</div>
+</div>
 </div>
 
-<div class="card">
-<h3>Mining 24 Jam</h3>
-<p>Dapatkan 20 $CBS setiap 24 jam</p>
-<button onclick="startMining()">Start Mining</button>
-<div class="timer" id="timer"></div>
+<div class="balance-section">
+<h2>Saldo Total ($CBS)</h2>
+<div class="balance" id="balance">0 $CBS</div>
+
+<div class="mining-bubble" onclick="mine()">
+Ketuk untuk<br>memulai
+</div>
 </div>
 
 <div class="card">
 <h3>AI Reward</h3>
-<p>Jawab pertanyaan crypto & dapatkan 10 $CBS</p>
-<button onclick="aiTask()">Mulai AI Task</button>
+<p>Jawab pertanyaan crypto & dapatkan 15 $CBS</p>
+<button class="button" onclick="task()">Mulai</button>
 </div>
 
 <div class="card">
-<h3>Referral ID Pioneer</h3>
+<h3>Referral ID</h3>
 <div id="referral"></div>
 </div>
 
-</div>
-
 <div class="footer">
-© 2026 SURANDA NETWORK - $CBS
+© 2026 SURANDA NETWORK
 </div>
 
 <script>
-let balance = localStorage.getItem("$cbsBalance") ? parseInt(localStorage.getItem("cbsBalance")) : 0;
-let miningTime = localStorage.getItem("miningTime");
-
+let balance = localStorage.getItem("balance") ? parseInt(localStorage.getItem("balance")) : 0;
 document.getElementById("balance").innerText = balance + " $CBS";
 
+function mine(){
+balance += 25;
+localStorage.setItem("balance", balance);
+document.getElementById("balance").innerText = balance + " $CBS";
+alert("Mining berhasil +25 $CBS");
+}
+
+function task(){
+let answer = prompt("Siapa pencipta Bitcoin?");
+if(answer && answer.toLowerCase().includes("satoshi")){
+balance += 15;
+localStorage.setItem("balance", balance);
+document.getElementById("balance").innerText = balance + " $CBS";
+alert("Benar! +15 $CBS");
+}else{
+alert("Jawaban salah");
+}
+}
+
 function generateReferral(){
-let id = "BS-" + Math.floor(100000 + Math.random()*900000);
+let id = "CBS-" + Math.floor(100000 + Math.random()*900000);
 document.getElementById("referral").innerText = id;
 }
 generateReferral();
-
-function startMining(){
-let now = Date.now();
-
-if(miningTime && now - miningTime < 86400000){
-alert("Mining masih dalam proses 24 jam!");
-return;
-}
-
-balance += 20;
-localStorage.setItem("cbsBalance", balance);
-document.getElementById("balance").innerText = balance + " $CBS";
-
-localStorage.setItem("miningTime", now);
-alert("Mining berhasil! +20 $CBS");
-}
-
-function aiTask(){
-let answer = prompt("Apa itu Blockchain?");
-if(answer && answer.length > 5){
-balance += 10;
-localStorage.setItem("cbsBalance", balance);
-document.getElementById("balance").innerText = balance + " $CBS";
-alert("AI Reward berhasil! +10 $CBS");
-}else{
-alert("Jawaban kurang tepat!");
-}
-}
 </script>
 
 </body>
