@@ -2,173 +2,163 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SURANDA NETWORK</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SURANDA NETWORK</title>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
 margin:0;
-font-family:Arial;
-text-align:center;
-background:linear-gradient(135deg,#001f1f,#2b0052);
+font-family:Arial, sans-serif;
+background: linear-gradient(135deg,#0f2027,#2c5364);
 color:white;
+text-align:center;
 }
 
-header{
+.container{
 padding:20px;
-background:linear-gradient(90deg,#00ff99,#7b2cff);
-}
-
-.logo{
-width:90px;
-border-radius:50%;
-animation:spin 6s linear infinite;
-box-shadow:0 0 25px #00ff99;
-}
-
-@keyframes spin{
-100%{transform:rotate(360deg);}
 }
 
 .card{
-background:rgba(255,255,255,0.05);
-margin:20px;
-padding:20px;
+background: rgba(255,255,255,0.08);
+backdrop-filter: blur(10px);
 border-radius:20px;
+padding:20px;
+margin-top:20px;
+box-shadow:0 0 20px rgba(0,255,150,0.3);
 }
 
 button{
-padding:12px 25px;
+background: linear-gradient(45deg,#00ff99,#a100ff);
 border:none;
-border-radius:25px;
-background:linear-gradient(90deg,#00ff99,#7b2cff);
+padding:15px 25px;
+border-radius:30px;
 color:white;
 font-size:16px;
+margin-top:15px;
 cursor:pointer;
 }
 
-canvas{
-background:white;
-border-radius:10px;
-margin-top:15px;
+img{
+width:120px;
+margin-top:20px;
+}
+
+h1{
+background: linear-gradient(to right,#00ff99,#a100ff);
+-webkit-background-clip:text;
+color:transparent;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-<img src="logo-coin.png" class="logo">
-<h2>SURANDA NETWORK</h2>
-</header>
+<div class="container">
 
-<div id="loginCard" class="card">
-<h3>Login dengan Google</h3>
-<button onclick="login()">Login Google</button>
+<img src="logo-coin.png">
+<h1>SURANDA NETWORK</h1>
+
+<div id="loginDiv" class="card">
+<h2>Login Google</h2>
+<button onclick="login()">Login dengan Google</button>
 </div>
 
-<div id="app" style="display:none;">
+<div id="appDiv" class="card" style="display:none;">
+<h2 id="welcome"></h2>
+<h3>Saldo: <span id="balance">0</span> SRD</h3>
 
-<div class="card">
-<h3 id="user"></h3>
-<p>Saldo: <span id="saldo">0</span> $CBS</p>
 <button onclick="mine()">Start Mining</button>
-</div>
 
-<div class="card">
-<h3>Grafik Saldo</h3>
-<canvas id="chart" width="300" height="200"></canvas>
+<canvas id="chart" height="100"></canvas>
 </div>
-
-<button onclick="logout()">Logout</button>
 
 </div>
 
 <script type="module">
 
-// 🔴 MASUKKAN FIREBASE CONFIG DISINI
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
 const firebaseConfig = {
-  apiKey: "ISI_API_KEY",
-  authDomain: "ISI_AUTH_DOMAIN",
-  projectId: "ISI_PROJECT_ID",
-  storageBucket: "ISI_STORAGE",
-  messagingSenderId: "ISI_SENDER_ID",
-  appId: "ISI_APP_ID"
+apiKey: "AIzaSyD1tjSYT-JMQhqDcLzlFDnT2LSmLGOHUaY",
+authDomain: "suranda-network.firebaseapp.com",
+projectId: "suranda-network",
+storageBucket: "suranda-network.firebasestorage.app",
+messagingSenderId: "704323506183",
+appId: "1:704323506183:web:c49d907abda335f012daa2",
+measurementId: "G-0RKC2YNY27"
 };
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-let saldo = 0;
-let chartData = [];
+let currentUser;
+let balance = 0;
+let chart;
+let history = [];
 
 window.login = async function(){
 const provider = new GoogleAuthProvider();
-await signInWithPopup(auth, provider);
+const result = await signInWithPopup(auth, provider);
+currentUser = result.user;
+
+document.getElementById("loginDiv").style.display="none";
+document.getElementById("appDiv").style.display="block";
+document.getElementById("welcome").innerText="Halo, "+currentUser.displayName;
+
+loadBalance();
 }
 
-window.logout = async function(){
-await signOut(auth);
-}
-
-onAuthStateChanged(auth, async (user)=>{
-if(user){
-document.getElementById("loginCard").style.display="none";
-document.getElementById("app").style.display="block";
-document.getElementById("user").innerText="Halo "+user.displayName;
-
-const docRef = doc(db,"users",user.uid);
+async function loadBalance(){
+const docRef = doc(db,"users",currentUser.uid);
 const docSnap = await getDoc(docRef);
 
 if(docSnap.exists()){
-saldo = docSnap.data().saldo;
+balance = docSnap.data().balance;
+history = docSnap.data().history || [];
 }else{
-await setDoc(docRef,{saldo:0});
-saldo=0;
+await setDoc(docRef,{balance:0,history:[]});
+balance=0;
+history=[];
 }
 
 updateUI();
 }
-});
 
 window.mine = async function(){
-const user = auth.currentUser;
-saldo += 5;
+balance += 1;
+history.push(balance);
 
-await updateDoc(doc(db,"users",user.uid),{
-saldo: saldo
+const docRef = doc(db,"users",currentUser.uid);
+await updateDoc(docRef,{
+balance:balance,
+history:history
 });
 
 updateUI();
 }
 
 function updateUI(){
-document.getElementById("saldo").innerText = saldo;
-chartData.push(saldo);
-drawChart();
+document.getElementById("balance").innerText=balance;
+
+if(chart) chart.destroy();
+
+chart = new Chart(document.getElementById("chart"),{
+type:'line',
+data:{
+labels:history.map((_,i)=>i+1),
+datasets:[{
+label:'Saldo SRD',
+data:history
+}]
 }
-
-function drawChart(){
-const canvas=document.getElementById("chart");
-const ctx=canvas.getContext("2d");
-ctx.clearRect(0,0,300,200);
-ctx.beginPath();
-ctx.moveTo(0,200-chartData[0]);
-
-chartData.forEach((val,i)=>{
-ctx.lineTo(i*30,200-val);
 });
-
-ctx.stroke();
 }
 
 </script>
