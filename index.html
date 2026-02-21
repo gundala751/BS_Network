@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA BS NETWORK - CBS TOKEN</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+background:#000;
+color:#FFD700;
+text-align:center;
+}
+
+header{
+padding:20px;
+font-size:22px;
+font-weight:bold;
+background:linear-gradient(90deg,#000,#111,#000);
+box-shadow:0 0 20px #FFD70055;
+}
+
+.container{
+padding:20px;
+}
+
+.card{
+background:#111;
+margin:15px 0;
+padding:20px;
+border-radius:20px;
+box-shadow:0 0 25px #FFD70033;
+}
+
+.balance{
+font-size:32px;
+margin-top:10px;
+font-weight:bold;
+}
+
+button{
+margin-top:15px;
+padding:12px 25px;
+border:none;
+border-radius:15px;
+font-weight:bold;
+background:#FFD700;
+color:#000;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+box-shadow:0 0 20px #FFD700;
+}
+
+.timer{
+margin-top:10px;
+font-size:14px;
+color:#ccc;
+}
+
+.footer{
+margin-top:30px;
+padding:15px;
+font-size:12px;
+color:#555;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+⛏️ IA BS NETWORK  
+<br> CBS TOKEN PRO DASHBOARD
+</header>
+
+<div class="container">
+
+<div class="card">
+<h2>Saldo CBS</h2>
+<div class="balance" id="balance">0 CBS</div>
+</div>
+
+<div class="card">
+<h3>Mining 24 Jam</h3>
+<p>Dapatkan 20 CBS setiap 24 jam</p>
+<button onclick="startMining()">Start Mining</button>
+<div class="timer" id="timer"></div>
+</div>
+
+<div class="card">
+<h3>AI Reward</h3>
+<p>Jawab pertanyaan crypto & dapatkan 10 CBS</p>
+<button onclick="aiTask()">Mulai AI Task</button>
+</div>
+
+<div class="card">
+<h3>Referral ID Pioneer</h3>
+<div id="referral"></div>
+</div>
+
+</div>
+
+<div class="footer">
+© 2026 IA BS NETWORK - CBS TOKEN
+</div>
+
+<script>
+let balance = localStorage.getItem("cbsBalance") ? parseInt(localStorage.getItem("cbsBalance")) : 0;
+let miningTime = localStorage.getItem("miningTime");
+
+document.getElementById("balance").innerText = balance + " CBS";
+
+function generateReferral(){
+let id = "BS-" + Math.floor(100000 + Math.random()*900000);
+document.getElementById("referral").innerText = id;
+}
+generateReferral();
+
+function startMining(){
+let now = Date.now();
+
+if(miningTime && now - miningTime < 86400000){
+alert("Mining masih dalam proses 24 jam!");
+return;
+}
+
+balance += 20;
+localStorage.setItem("cbsBalance", balance);
+document.getElementById("balance").innerText = balance + " CBS";
+
+localStorage.setItem("miningTime", now);
+alert("Mining berhasil! +20 CBS");
+}
+
+function aiTask(){
+let answer = prompt("Apa itu Blockchain?");
+if(answer && answer.length > 5){
+balance += 10;
+localStorage.setItem("cbsBalance", balance);
+document.getElementById("balance").innerText = balance + " CBS";
+alert("AI Reward berhasil! +10 CBS");
+}else{
+alert("Jawaban kurang tepat!");
+}
+}
+</script>
+
+</body>
+</html>
