@@ -87,19 +87,19 @@ color:#555;
 
 <div class="card">
 <h2>Saldo CBS</h2>
-<div class="balance" id="balance">0 CBS</div>
+<div class="balance" id="balance">0 $CBS</div>
 </div>
 
 <div class="card">
 <h3>Mining 24 Jam</h3>
-<p>Dapatkan 20 CBS setiap 24 jam</p>
+<p>Dapatkan 20 $CBS setiap 24 jam</p>
 <button onclick="startMining()">Start Mining</button>
 <div class="timer" id="timer"></div>
 </div>
 
 <div class="card">
 <h3>AI Reward</h3>
-<p>Jawab pertanyaan crypto & dapatkan 10 CBS</p>
+<p>Jawab pertanyaan crypto & dapatkan 10 $CBS</p>
 <button onclick="aiTask()">Mulai AI Task</button>
 </div>
 
@@ -115,10 +115,10 @@ color:#555;
 </div>
 
 <script>
-let balance = localStorage.getItem("cbsBalance") ? parseInt(localStorage.getItem("cbsBalance")) : 0;
+let balance = localStorage.getItem("$cbsBalance") ? parseInt(localStorage.getItem("cbsBalance")) : 0;
 let miningTime = localStorage.getItem("miningTime");
 
-document.getElementById("balance").innerText = balance + " CBS";
+document.getElementById("balance").innerText = balance + " $CBS";
 
 function generateReferral(){
 let id = "BS-" + Math.floor(100000 + Math.random()*900000);
@@ -136,10 +136,10 @@ return;
 
 balance += 20;
 localStorage.setItem("cbsBalance", balance);
-document.getElementById("balance").innerText = balance + " CBS";
+document.getElementById("balance").innerText = balance + " $CBS";
 
 localStorage.setItem("miningTime", now);
-alert("Mining berhasil! +20 CBS");
+alert("Mining berhasil! +20 $CBS");
 }
 
 function aiTask(){
@@ -147,8 +147,8 @@ let answer = prompt("Apa itu Blockchain?");
 if(answer && answer.length > 5){
 balance += 10;
 localStorage.setItem("cbsBalance", balance);
-document.getElementById("balance").innerText = balance + " CBS";
-alert("AI Reward berhasil! +10 CBS");
+document.getElementById("balance").innerText = balance + " $CBS";
+alert("AI Reward berhasil! +10 $CBS");
 }else{
 alert("Jawaban kurang tepat!");
 }
