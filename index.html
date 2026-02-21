@@ -4,134 +4,173 @@
 <meta charset="UTF-8">
 <title>SURANDA NETWORK</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(135deg,#e6f0ff,#f8f9ff);
 text-align:center;
+background:linear-gradient(135deg,#001f1f,#2b0052);
+color:white;
 }
+
+header{
+padding:20px;
+background:linear-gradient(90deg,#00ff99,#7b2cff);
+}
+
+.logo{
+width:90px;
+border-radius:50%;
+animation:spin 6s linear infinite;
+box-shadow:0 0 25px #00ff99;
+}
+
+@keyframes spin{
+100%{transform:rotate(360deg);}
+}
+
 .card{
-background:white;
+background:rgba(255,255,255,0.05);
 margin:20px;
 padding:20px;
 border-radius:20px;
-box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
+
 button{
-padding:12px 20px;
+padding:12px 25px;
 border:none;
-border-radius:30px;
-background:linear-gradient(45deg,#7b4dff,#9c6bff);
+border-radius:25px;
+background:linear-gradient(90deg,#00ff99,#7b2cff);
 color:white;
 font-size:16px;
 cursor:pointer;
-margin:5px;
 }
-input{
-padding:10px;
+
+canvas{
+background:white;
 border-radius:10px;
-border:1px solid #ccc;
-width:80%;
-margin:5px;
-}
-.logo{
-width:120px;
-border-radius:50%;
-animation:glow 2s infinite alternate;
-}
-@keyframes glow{
-from{box-shadow:0 0 10px gold;}
-to{box-shadow:0 0 30px orange;}
-}
-.menu{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
-a{
-text-decoration:none;
-color:#7b4dff;
-}
-.footer{
-margin-top:30px;
-font-size:12px;
-color:gray;
+margin-top:15px;
 }
 </style>
 </head>
+
 <body>
 
-<div class="card">
-<img src="logo.coin.png" class="logo">
+<header>
+<img src="logo-coin.png" class="logo">
 <h2>SURANDA NETWORK</h2>
-<p>Mining Token $CBS</p>
+</header>
+
+<div id="loginCard" class="card">
+<h3>Login dengan Google</h3>
+<button onclick="login()">Login Google</button>
+</div>
+
+<div id="app" style="display:none;">
+
+<div class="card">
+<h3 id="user"></h3>
+<p>Saldo: <span id="saldo">0</span> $CBS</p>
+<button onclick="mine()">Start Mining</button>
 </div>
 
 <div class="card">
-<h3>Dompet $CBS</h3>
-<h1 id="saldo">0.000</h1>
-<button onclick="startMining()">Mulai Mining</button>
-<button onclick="withdraw()">Withdraw</button>
+<h3>Grafik Saldo</h3>
+<canvas id="chart" width="300" height="200"></canvas>
 </div>
 
-<div class="card">
-<h3>Referral System</h3>
-<p>ID Referral Anda:</p>
-<h4 id="refid"></h4>
-<input id="refinput" placeholder="Masukkan ID Referral">
-<button onclick="saveRef()">Simpan Referral</button>
+<button onclick="logout()">Logout</button>
+
 </div>
 
-<div class="card">
-<h3>Official Media</h3>
-<div class="menu">
-<a href="#">Facebook</a>
-<a href="#">Twitter</a>
-<a href="#">Telegram</a>
-<a href="#">TikTok</a>
-</div>
-</div>
+<script type="module">
 
-<div class="card">
-<h3>Kebijakan & Ketentuan</h3>
-<p>SURANDA NETWORK adalah platform mining digital simulasi. 
-Setiap pengguna wajib menjaga keamanan akun dan data pribadi.</p>
-</div>
+// 🔴 MASUKKAN FIREBASE CONFIG DISINI
+const firebaseConfig = {
+  apiKey: "ISI_API_KEY",
+  authDomain: "ISI_AUTH_DOMAIN",
+  projectId: "ISI_PROJECT_ID",
+  storageBucket: "ISI_STORAGE",
+  messagingSenderId: "ISI_SENDER_ID",
+  appId: "ISI_APP_ID"
+};
 
-<div class="card">
-<h3>Support</h3>
-<p>Email: <b>bscdeveloper6@gmail.com</b></p>
-</div>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<div class="footer">
-© 2026 SURANDA NETWORK
-</div>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
 
-<script>
 let saldo = 0;
-let mining = false;
+let chartData = [];
 
-document.getElementById("refid").innerText = 
-"REF"+Math.floor(Math.random()*100000);
-
-function startMining(){
-if(!mining){
-mining=true;
-setInterval(()=>{
-saldo += 0.001;
-document.getElementById("saldo").innerText = saldo.toFixed(3);
-},1000);
-}
+window.login = async function(){
+const provider = new GoogleAuthProvider();
+await signInWithPopup(auth, provider);
 }
 
-function withdraw(){
-alert("Withdraw berhasil (Simulasi)");
+window.logout = async function(){
+await signOut(auth);
 }
 
-function saveRef(){
-alert("Referral disimpan!");
+onAuthStateChanged(auth, async (user)=>{
+if(user){
+document.getElementById("loginCard").style.display="none";
+document.getElementById("app").style.display="block";
+document.getElementById("user").innerText="Halo "+user.displayName;
+
+const docRef = doc(db,"users",user.uid);
+const docSnap = await getDoc(docRef);
+
+if(docSnap.exists()){
+saldo = docSnap.data().saldo;
+}else{
+await setDoc(docRef,{saldo:0});
+saldo=0;
 }
+
+updateUI();
+}
+});
+
+window.mine = async function(){
+const user = auth.currentUser;
+saldo += 5;
+
+await updateDoc(doc(db,"users",user.uid),{
+saldo: saldo
+});
+
+updateUI();
+}
+
+function updateUI(){
+document.getElementById("saldo").innerText = saldo;
+chartData.push(saldo);
+drawChart();
+}
+
+function drawChart(){
+const canvas=document.getElementById("chart");
+const ctx=canvas.getContext("2d");
+ctx.clearRect(0,0,300,200);
+ctx.beginPath();
+ctx.moveTo(0,200-chartData[0]);
+
+chartData.forEach((val,i)=>{
+ctx.lineTo(i*30,200-val);
+});
+
+ctx.stroke();
+}
+
 </script>
 
 </body>
