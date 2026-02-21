@@ -1,176 +1,136 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SURANDA NETWORK</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-body{background:#f4f6fb;padding-bottom:80px;}
-
-.header{
-padding:20px;
-background:linear-gradient(90deg,#6a11cb,#2575fc);
-color:white;
-border-bottom-left-radius:30px;
-border-bottom-right-radius:30px;
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#e6f0ff,#f8f9ff);
+text-align:center;
 }
-
 .card{
 background:white;
-margin:15px;
+margin:20px;
 padding:20px;
 border-radius:20px;
-box-shadow:0 8px 25px rgba(0,0,0,0.08);
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
-
-.button{
-background:linear-gradient(90deg,#6a11cb,#2575fc);
-color:white;
-padding:10px 20px;
+button{
+padding:12px 20px;
 border:none;
-border-radius:20px;
-margin-top:10px;
+border-radius:30px;
+background:linear-gradient(45deg,#7b4dff,#9c6bff);
+color:white;
+font-size:16px;
 cursor:pointer;
+margin:5px;
 }
-
 input{
-width:100%;
 padding:10px;
-margin-top:10px;
 border-radius:10px;
 border:1px solid #ccc;
+width:80%;
+margin:5px;
 }
-
-.hidden{display:none;}
-
-.nav{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:white;
-display:flex;
-justify-content:space-around;
-padding:15px 0;
-box-shadow:0 -5px 20px rgba(0,0,0,0.1);
+.logo{
+width:120px;
+border-radius:50%;
+animation:glow 2s infinite alternate;
+}
+@keyframes glow{
+from{box-shadow:0 0 10px gold;}
+to{box-shadow:0 0 30px orange;}
+}
+.menu{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+a{
+text-decoration:none;
+color:#7b4dff;
+}
+.footer{
+margin-top:30px;
+font-size:12px;
+color:gray;
 }
 </style>
 </head>
-
 <body>
 
-<div id="loginPage">
 <div class="card">
-<img src="logo.png" width="80" style="border-radius:50%;margin-bottom:10px;">
+<img src="logo.coin.png" class="logo">
 <h2>SURANDA NETWORK</h2>
-
-<img src="logo.png" width="100" style="border-radius:50%;margin-bottom:15px;">
-<h2>SURANDA NETWORK</h2>
-<p>Login untuk mulai mining</p>
-
-<input type="text" id="username" placeholder="Masukkan Username">
-<button class="button" onclick="login()">Login</button>
-</div>
-</div>
-
-<div id="app" class="hidden">
-
-<div class="header">
-<h2>SURANDA NETWORK</h2>
-<div>Halo, <span id="userDisplay"></span></div>
-<div><b id="balance">0 $CBS</b></div>
+<p>Mining Token $CBS</p>
 </div>
 
 <div class="card">
-<h3>Mining</h3>
-<button class="button" onclick="mine()">+30 $CBS</button>
+<h3>Dompet $CBS</h3>
+<h1 id="saldo">0.000</h1>
+<button onclick="startMining()">Mulai Mining</button>
+<button onclick="withdraw()">Withdraw</button>
 </div>
 
 <div class="card">
-<h3>Referral</h3>
-<p>Kode Anda:</p>
-<b id="ref"></b>
-<input type="text" id="refInput" placeholder="Masukkan kode referral">
-<button class="button" onclick="useReferral()">Gunakan</button>
+<h3>Referral System</h3>
+<p>ID Referral Anda:</p>
+<h4 id="refid"></h4>
+<input id="refinput" placeholder="Masukkan ID Referral">
+<button onclick="saveRef()">Simpan Referral</button>
+</div>
+
+<div class="card">
+<h3>Official Media</h3>
+<div class="menu">
+<a href="#">Facebook</a>
+<a href="#">Twitter</a>
+<a href="#">Telegram</a>
+<a href="#">TikTok</a>
+</div>
+</div>
+
+<div class="card">
+<h3>Kebijakan & Ketentuan</h3>
+<p>SURANDA NETWORK adalah platform mining digital simulasi. 
+Setiap pengguna wajib menjaga keamanan akun dan data pribadi.</p>
 </div>
 
 <div class="card">
 <h3>Support</h3>
-<p>Email: bscdeveloper6@gmail.com</p>
+<p>Email: <b>bscdeveloper6@gmail.com</b></p>
 </div>
 
-<div class="nav">
-<button onclick="logout()">Logout</button>
-</div>
-
+<div class="footer">
+© 2026 SURANDA NETWORK
 </div>
 
 <script>
-let currentUser = localStorage.getItem("currentUser");
+let saldo = 0;
+let mining = false;
 
-if(currentUser){
-showApp();
-}
+document.getElementById("refid").innerText = 
+"REF"+Math.floor(Math.random()*100000);
 
-function login(){
-let username = document.getElementById("username").value;
-if(username.length < 3){
-alert("Username minimal 3 huruf");
-return;
-}
-localStorage.setItem("currentUser", username);
-showApp();
-}
-
-function showApp(){
-currentUser = localStorage.getItem("currentUser");
-document.getElementById("loginPage").classList.add("hidden");
-document.getElementById("app").classList.remove("hidden");
-document.getElementById("userDisplay").innerText = currentUser;
-
-if(!localStorage.getItem(currentUser+"_balance")){
-localStorage.setItem(currentUser+"_balance", 0);
-let refCode = "CBS-" + Math.floor(100000 + Math.random()*900000);
-localStorage.setItem(currentUser+"_ref", refCode);
-}
-
-updateData();
-}
-
-function updateData(){
-let balance = localStorage.getItem(currentUser+"_balance");
-document.getElementById("balance").innerText = balance + " $CBS";
-document.getElementById("ref").innerText = localStorage.getItem(currentUser+"_ref");
-}
-
-function mine(){
-let balance = parseInt(localStorage.getItem(currentUser+"_balance"));
-balance += 30;
-localStorage.setItem(currentUser+"_balance", balance);
-updateData();
-alert("Mining berhasil +30 $CBS");
-}
-
-function useReferral(){
-let input = document.getElementById("refInput").value;
-let myRef = localStorage.getItem(currentUser+"_ref");
-
-if(input && input !== myRef){
-let balance = parseInt(localStorage.getItem(currentUser+"_balance"));
-balance += 50;
-localStorage.setItem(currentUser+"_balance", balance);
-updateData();
-alert("Referral berhasil +50 $CBS");
-}else{
-alert("Kode tidak valid");
+function startMining(){
+if(!mining){
+mining=true;
+setInterval(()=>{
+saldo += 0.001;
+document.getElementById("saldo").innerText = saldo.toFixed(3);
+},1000);
 }
 }
 
-function logout(){
-localStorage.removeItem("currentUser");
-location.reload();
+function withdraw(){
+alert("Withdraw berhasil (Simulasi)");
+}
+
+function saveRef(){
+alert("Referral disimpan!");
 }
 </script>
 
