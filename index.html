@@ -1,167 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SURANDA NETWORK</title>
+  <title>SURANDA NETWORK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin:0;
+      font-family:Arial;
+      text-align:center;
+      background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      color:white;
+    }
 
-<style>
-body{
-margin:0;
-font-family:Arial, sans-serif;
-background: linear-gradient(135deg,#0f2027,#2c5364);
-color:white;
-text-align:center;
-}
+    .card {
+      margin:20px;
+      padding:20px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.05);
+    }
 
-.container{
-padding:20px;
-}
-
-.card{
-background: rgba(255,255,255,0.08);
-backdrop-filter: blur(10px);
-border-radius:20px;
-padding:20px;
-margin-top:20px;
-box-shadow:0 0 20px rgba(0,255,150,0.3);
-}
-
-button{
-background: linear-gradient(45deg,#00ff99,#a100ff);
-border:none;
-padding:15px 25px;
-border-radius:30px;
-color:white;
-font-size:16px;
-margin-top:15px;
-cursor:pointer;
-}
-
-img{
-width:120px;
-margin-top:20px;
-}
-
-h1{
-background: linear-gradient(to right,#00ff99,#a100ff);
--webkit-background-clip:text;
-color:transparent;
-}
-</style>
+    button {
+      padding:15px 40px;
+      border:none;
+      border-radius:50px;
+      font-size:18px;
+      background:linear-gradient(90deg,#00ff9d,#a100ff);
+      color:white;
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="container">
+<img src="logo-coin.png" width="120">
 
-<img src="logo-coin.png">
 <h1>SURANDA NETWORK</h1>
 
-<div id="loginDiv" class="card">
-<h2>Login Google</h2>
-<button onclick="login()">Login dengan Google</button>
+<div class="card">
+  <h2 id="userName">Login dulu</h2>
+  <h3>Saldo: <span id="saldo">0</span> $CBS</h3>
+  <button onclick="startMining()">Start Mining</button>
 </div>
 
-<div id="appDiv" class="card" style="display:none;">
-<h2 id="welcome"></h2>
-<h3>Saldo: <span id="balance">0</span> SRD</h3>
-
-<button onclick="mine()">Start Mining</button>
-
-<canvas id="chart" height="100"></canvas>
-</div>
-
-</div>
+<button onclick="login()">Login Google</button>
+<button onclick="logout()">Logout</button>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup } 
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
 import { getFirestore, doc, getDoc, setDoc, updateDoc } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyD1tjSYT-JMQhqDcLzlFDnT2LSmLGOHUaY",
-authDomain: "suranda-network.firebaseapp.com",
-projectId: "suranda-network",
-storageBucket: "suranda-network.firebasestorage.app",
-messagingSenderId: "704323506183",
-appId: "1:704323506183:web:c49d907abda335f012daa2",
-measurementId: "G-0RKC2YNY27"
+  apiKey: "ISI_API_KAMU",
+  authDomain: "suranda-network.firebaseapp.com",
+  projectId: "suranda-network",
+  storageBucket: "suranda-network.firebasestorage.app",
+  messagingSenderId: "704323506183",
+  appId: "1:704323506183:web:c49d907abda335f012daa2"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const auth = getAuth();
+const db = getFirestore();
+const provider = new GoogleAuthProvider();
 
-let currentUser;
-let balance = 0;
-let chart;
-let history = [];
+let currentUser = null;
 
 window.login = async function(){
-const provider = new GoogleAuthProvider();
-const result = await signInWithPopup(auth, provider);
-currentUser = result.user;
-
-document.getElementById("loginDiv").style.display="none";
-document.getElementById("appDiv").style.display="block";
-document.getElementById("welcome").innerText="Halo, "+currentUser.displayName;
-
-loadBalance();
+  const result = await signInWithPopup(auth, provider);
+  currentUser = result.user;
+  document.getElementById("userName").innerText = "Halo, " + currentUser.displayName;
+  loadSaldo();
 }
 
-async function loadBalance(){
-const docRef = doc(db,"users",currentUser.uid);
-const docSnap = await getDoc(docRef);
-
-if(docSnap.exists()){
-balance = docSnap.data().balance;
-history = docSnap.data().history || [];
-}else{
-await setDoc(docRef,{balance:0,history:[]});
-balance=0;
-history=[];
+window.logout = async function(){
+  await signOut(auth);
+  location.reload();
 }
 
-updateUI();
+async function loadSaldo(){
+  const docRef = doc(db, "users", currentUser.uid);
+  const docSnap = await getDoc(docRef);
+
+  if(docSnap.exists()){
+    document.getElementById("saldo").innerText = docSnap.data().saldo;
+  }else{
+    await setDoc(docRef, { saldo: 0 });
+  }
 }
 
-window.mine = async function(){
-balance += 1;
-history.push(balance);
+window.startMining = async function(){
+  if(!currentUser){
+    alert("Login dulu!");
+    return;
+  }
 
-const docRef = doc(db,"users",currentUser.uid);
-await updateDoc(docRef,{
-balance:balance,
-history:history
-});
+  const docRef = doc(db, "users", currentUser.uid);
+  const docSnap = await getDoc(docRef);
 
-updateUI();
-}
+  let saldo = docSnap.data().saldo + 1;
 
-function updateUI(){
-document.getElementById("balance").innerText=balance;
-
-if(chart) chart.destroy();
-
-chart = new Chart(document.getElementById("chart"),{
-type:'line',
-data:{
-labels:history.map((_,i)=>i+1),
-datasets:[{
-label:'Saldo SRD',
-data:history
-}]
-}
-});
+  await updateDoc(docRef, { saldo: saldo });
+  document.getElementById("saldo").innerText = saldo;
 }
 
 </script>
 
 </body>
 </html>
+bio 
